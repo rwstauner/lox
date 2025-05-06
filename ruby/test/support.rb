@@ -1,2 +1,2 @@
 require "minitest/autorun"
-require_relative "../lib/lox/cli"
+require_relative "../lib/lox"

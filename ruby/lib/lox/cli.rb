@@ -1,8 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "errors"
-require_relative "scanner"
-
 module Lox
   class CLI
     def self.run!(argv)

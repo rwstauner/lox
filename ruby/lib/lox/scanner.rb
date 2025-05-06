@@ -1,7 +1,5 @@
 # frozen_string_literal: true
 
-require_relative "token"
-
 module Lox
   class Scanner
     attr_reader :errors, :source, :tokens
