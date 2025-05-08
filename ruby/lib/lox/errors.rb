@@ -7,4 +7,9 @@ module Lox
       super("#{message}\n\nat:\n#{location}")
     end
   end
+
+  def self.error(msg, token: nil, location: nil)
+    at = token.eof? ? "end" : token.lexeme.dump
+    printf "%s at %s: %s\n", token.line, at, msg
+  end
 end

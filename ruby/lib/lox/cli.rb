@@ -12,26 +12,26 @@ module Lox
       @argv = argv
     end
 
+    # TODO: consolidate with errors.rb
     def error(message, location = nil)
-      puts Error.new(message, location).message
+      Lox.error(Error.new(message, location).message)
     end
 
     def run_prompt
       loop do
-        puts "> "
+        print "> "
         line = gets
         break if line.nil?
-        result = run(line)
-        if result.error?
-          exit(65)
-        end
+        run(line)
       end
     end
 
     def run(str)
-      Scanner.new(str).scan.tokens.each do |token|
-        p token
-      end
+      expr = Parser.new(Scanner.new(str).scan.tokens).parse
+
+      exit(65) if expr.is_a?(Parser::Error)
+
+      AstPrinter.new(expr)
     end
 
     def run_file(file)
