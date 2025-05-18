@@ -6,10 +6,11 @@ module Lox
       new(argv).run!
     end
 
-    attr_reader :argv
+    attr_reader :argv, :interpreter
 
     def initialize(argv)
       @argv = argv
+      @interpreter = Interpreter.new
     end
 
     # TODO: consolidate with errors.rb
@@ -23,19 +24,31 @@ module Lox
         line = gets
         break if line.nil?
         run(line)
+      rescue => error
+        # Show errors but continue looping.
+        puts error
+        puts error.backtrace
       end
     end
 
     def run(str)
       expr = Parser.new(Scanner.new(str).scan.tokens).parse
 
-      exit(65) if expr.is_a?(Parser::Error)
-
-      AstPrinter.new(expr)
+      if expr.is_a?(Parser::Error)
+        had_error!(expr)
+      else
+        # AstPrinter.new(expr)
+        interpreter.interpret(expr)
+      end
     end
 
     def run_file(file)
       run(file == "-" ? STDIN.read : File.read(file))
+      if Lox.had_error?
+        exit(65)
+      elsif Lox.had_runtime_error?
+        exit(70)
+      end
     end
 
     def run!

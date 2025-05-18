@@ -88,7 +88,7 @@ module Lox
         elsif start_identifier?(c)
           scan_identifier
         else
-          error(Lox::Error, "Unexpected character")
+          error("Unexpected character")
         end
       end
     end
@@ -110,7 +110,7 @@ module Lox
       @source[@current + offset]
     end
 
-    def error(cls, message)
+    def error(message, cls = Lox::Error)
       @errors << cls.new(message, @line)
     end
 
