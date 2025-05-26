@@ -102,6 +102,12 @@ module Lox
       @environment.get(expr.name)
     end
 
+    def visit_assign(expr)
+      value = evaluate(expr.value)
+      @environment.assign(expr.name, value)
+      value
+    end
+
     def bool(val)
       # Lox follows Ruby’s simple rule: false and nil are falsey, and everything else is truthy.
       val

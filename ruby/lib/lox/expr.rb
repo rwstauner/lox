@@ -18,6 +18,7 @@ module Lox
       CODE
     end
 
+    type :Assign, %i[name value]
     type :Binary, %i[left operator right]
     type :Grouping, %i[expression]
     type :Literal, %i[value]

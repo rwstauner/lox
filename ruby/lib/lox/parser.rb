@@ -145,7 +145,30 @@ module Lox
     binary :comparison, :term, %i[GREATER GREATER_EQUAL LESS LESS_EQUAL]
     binary :equality, :comparison, %i[BANG_EQUAL EQUAL_EQUAL]
 
-    alias expression equality
+    def assignment
+      # Get any expression.
+      expr = equality
+
+      # If the next token is '=', turn this into an assignment.
+      if match?(Token::EQUAL)
+        equals = previous
+        value = assignment
+
+        if expr.is_a?(Expr::Variable)
+          # This will get more complex.
+          name = expr.name
+          return Expr::Assign.new(name, value)
+        end
+
+        # Report error but do not throw
+        # as parser doesn't need to synchronize here.
+        error(equals, "Invalid assignment target.")
+      end
+
+      expr
+    end
+
+    alias expression assignment
 
     def statement
       if match?(Token::PRINT)

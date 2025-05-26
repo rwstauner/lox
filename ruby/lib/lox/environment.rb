@@ -10,11 +10,24 @@ module Lox
       @values[name] = value
     end
 
-    # Token
-    def get(name)
-      @values.fetch(name.lexeme) do
-        raise Lox::RuntimeError, "Undefined variable '#{name.lexeme}'."
+    def assign(token, value)
+      key = token.lexeme
+      if @values.key?(key)
+        @values[key] = value
+        return
       end
+      undefined!(key)
+    end
+
+    def get(token)
+      key = token.lexeme
+      @values.fetch(key) do
+        undefined!(key)
+      end
+    end
+
+    def undefined!(name)
+      raise Lox::RuntimeError, "Undefined variable '#{name}'."
     end
   end
 end
