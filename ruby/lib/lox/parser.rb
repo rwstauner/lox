@@ -24,6 +24,7 @@ module Lox
     end
 
     def eof?
+      return true if @current >= @tokens.size
       peek.type == Token::EOF
     end
 
