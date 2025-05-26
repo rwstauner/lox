@@ -45,7 +45,7 @@ module Lox
 
     def consume(type, msg)
       if match?(type)
-        return advance
+        return previous
       end
       error(peek, msg)
     end
