@@ -22,5 +22,6 @@ module Lox
     type :Grouping, %i[expression]
     type :Literal, %i[value]
     type :Unary, %i[operator right]
+    type :Variable, %i[name]
   end
 end

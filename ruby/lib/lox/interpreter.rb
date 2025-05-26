@@ -10,6 +10,10 @@ module Lox
       end
     end
 
+    def initialize
+      @environment = Environment.new
+    end
+
     def interpret(statements)
       statements.each do |stmt|
         execute(stmt)
@@ -87,6 +91,15 @@ module Lox
     def visit_print_stmt(stmt)
       value = evaluate(stmt.expression)
       puts stringify(value)
+    end
+
+    def visit_var_stmt(stmt)
+      value = evaluate(stmt.initializer) if !stmt.initializer.nil?
+      @environment.define(stmt.name.lexeme, value)
+    end
+
+    def visit_variable(expr)
+      @environment.get(expr.name)
     end
 
     def bool(val)

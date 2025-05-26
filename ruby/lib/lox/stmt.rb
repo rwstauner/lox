@@ -20,5 +20,6 @@ module Lox
 
     type :Expression, %i[expression]
     type :Print, %i[expression]
+    type :Var, %i[name initializer]
   end
 end

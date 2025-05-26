@@ -82,7 +82,7 @@ module Lox
     def parse
       statements = []
       while !eof?
-        statements << statement
+        statements << declaration
       end
       statements
     rescue Error
@@ -98,6 +98,10 @@ module Lox
 
       if match?(Token::NUMBER, Token::STRING)
         return Expr::Literal.new(previous.literal)
+      end
+
+      if match?(Token::IDENTIFIER)
+        return Expr::Variable.new(previous)
       end
 
       if match?(Token::LEFT_PAREN)
@@ -160,6 +164,21 @@ module Lox
       expr = expression
       consume(Token::SEMICOLON, "Expect ';' after expression.")
       Stmt::Expression.new(expr)
+    end
+
+    def var_declaration
+      name = consume(Token::IDENTIFIER, "Expect variable name.")
+      initializer = expression if match?(Token::EQUAL)
+      consume(Token::SEMICOLON, "Expect ';' after variable declaration")
+      Stmt::Var.new(name, initializer)
+    end
+
+    def declaration
+      return var_declaration if match?(Token::VAR)
+
+      statement
+    rescue Error
+      synchronize
     end
   end
 end
