@@ -10,11 +10,16 @@ module Lox
       end
     end
 
-    def interpret(expr)
-      value = evaluate(expr)
-      puts stringify(value)
+    def interpret(statements)
+      statements.each do |stmt|
+        execute(stmt)
+      end
     rescue Error => error
       Lox.runtime_error(error)
+    end
+
+    def execute(stmt)
+      stmt&.accept(self)
     end
 
     def evaluate(expr)
@@ -73,6 +78,15 @@ module Lox
       when Token::EQUAL_EQUAL
         return vals_equal?(left, right)
       end
+    end
+
+    def visit_expression_stmt(stmt)
+      evaluate(stmt.expression)
+    end
+
+    def visit_print_stmt(stmt)
+      value = evaluate(stmt.expression)
+      puts stringify(value)
     end
 
     def bool(val)

@@ -80,7 +80,11 @@ module Lox
     end
 
     def parse
-      expression
+      statements = []
+      while !eof?
+        statements << statement
+      end
+      statements
     rescue Error
       nil
     end
@@ -137,5 +141,25 @@ module Lox
     binary :equality, :comparison, %i[BANG_EQUAL EQUAL_EQUAL]
 
     alias expression equality
+
+    def statement
+      if match?(Token::PRINT)
+        print_statement
+      else
+        expression_statement
+      end
+    end
+
+    def print_statement
+      value = expression
+      consume(Token::SEMICOLON, "Expect ';' after value.")
+      Stmt::Print.new(value)
+    end
+
+    def expression_statement
+      expr = expression
+      consume(Token::SEMICOLON, "Expect ';' after expression.")
+      Stmt::Expression.new(expr)
+    end
   end
 end

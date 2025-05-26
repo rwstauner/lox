@@ -32,13 +32,13 @@ module Lox
     end
 
     def run(str)
-      expr = Parser.new(Scanner.new(str).scan.tokens).parse
+      statements = Parser.new(Scanner.new(str).scan.tokens).parse
 
-      if expr.is_a?(Parser::Error)
-        had_error!(expr)
+      if !statements
+        Lox.had_error!
       else
         # AstPrinter.new(expr)
-        interpreter.interpret(expr)
+        interpreter.interpret(statements)
       end
     end
 
