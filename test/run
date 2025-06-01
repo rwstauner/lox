@@ -1,0 +1,39 @@
+#!/bin/bash -e
+
+die () {
+  echo "$*" >&2
+  exit 1
+}
+
+[ $# -gt 0 ] || die "pass path to interpreter"
+
+lox=$1; shift
+lox () {
+  "$lox" "$@"
+}
+
+assert_output () {
+  diff -u <(lox - <<<"$1") <(cat <<<"$2")
+}
+
+ok () {
+  echo "ok"
+}
+
+run () {
+  t="$1"
+  in="$t/in.lox"
+  out="$t/out.txt"
+  if [ -f "$in" ]; then
+    diff -u <(lox "$in") "$out" && ok
+  else
+    (source "$i") && ok
+  fi
+}
+
+[ $# -gt 0 ] || set -- $(find "${0%/*}" -type d -mindepth 1)
+
+for i in "$@"; do
+  printf "%s: " "$i"
+  run "$i"
+done
