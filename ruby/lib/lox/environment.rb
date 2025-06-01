@@ -2,8 +2,9 @@
 
 module Lox
   class Environment
-    def initialize
+    def initialize(enclosing = nil)
       @values = {}
+      @enclosing = enclosing
     end
 
     def define(name, value)
@@ -16,14 +17,23 @@ module Lox
         @values[key] = value
         return
       end
+
+      return @enclosing.assign(token) if enclosed?
+
       undefined!(key)
     end
 
     def get(token)
       key = token.lexeme
       @values.fetch(key) do
+        return @enclosing.get(token) if enclosed?
+
         undefined!(key)
       end
+    end
+
+    def enclosed?
+      !@enclosing.nil?
     end
 
     def undefined!(name)

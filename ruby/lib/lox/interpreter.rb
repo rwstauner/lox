@@ -26,6 +26,16 @@ module Lox
       stmt&.accept(self)
     end
 
+    def execute_block(statements, environment)
+      previous_env = @environment
+      @environment = environment
+      statements.each do |stmt|
+        execute(stmt)
+      end
+    ensure
+      @environment = previous_env
+    end
+
     def evaluate(expr)
       expr&.accept(self)
     end
@@ -82,6 +92,10 @@ module Lox
       when Token::EQUAL_EQUAL
         return vals_equal?(left, right)
       end
+    end
+
+    def visit_block_stmt(stmt)
+      execute_block(stmt.statements, Environment.new(@environment))
     end
 
     def visit_expression_stmt(stmt)

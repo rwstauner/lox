@@ -171,11 +171,21 @@ module Lox
     alias expression assignment
 
     def statement
-      if match?(Token::PRINT)
-        print_statement
-      else
-        expression_statement
+      return print_statement if match?(Token::PRINT)
+      return block_statement if match?(Token::LEFT_BRACE)
+
+      expression_statement
+    end
+
+    def block_statement
+      statements = []
+
+      while !current?(Token::RIGHT_BRACE) && !eof?
+        statements << declaration
       end
+
+      consume(Token::RIGHT_BRACE, "Expect '}' after block.")
+      Stmt::Block.new(statements)
     end
 
     def print_statement

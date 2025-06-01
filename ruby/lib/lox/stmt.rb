@@ -18,6 +18,7 @@ module Lox
       CODE
     end
 
+    type :Block, %i[statements]
     type :Expression, %i[expression]
     type :Print, %i[expression]
     type :Var, %i[name initializer]
