@@ -83,7 +83,7 @@ module Lox
     def parse
       statements = []
       while !eof?
-        statements << declaration
+        statements << first_rule
       end
       statements
     rescue Error
@@ -92,46 +92,56 @@ module Lox
 
     # Grammar rules in increasing order of precedence.
 
-    def primary
-      return Expr::Literal.new(false) if match?(Token::FALSE)
-      return Expr::Literal.new(true) if match?(Token::TRUE)
-      return Expr::Literal.new(nil) if match?(Token::NIL)
+    def self.rule(name, &block)
+      if block.arity == 1
+        orig = block
+        rule = @last_rule
+        block = ->() { instance_exec(->() { send(rule) }, &orig) }
+      end
+      define_method(name, &block)
+      @last_rule = name
+    end
+
+    rule :primary do
+      next Expr::Literal.new(false) if match?(Token::FALSE)
+      next Expr::Literal.new(true) if match?(Token::TRUE)
+      next Expr::Literal.new(nil) if match?(Token::NIL)
 
       if match?(Token::NUMBER, Token::STRING)
-        return Expr::Literal.new(previous.literal)
+        next Expr::Literal.new(previous.literal)
       end
 
       if match?(Token::IDENTIFIER)
-        return Expr::Variable.new(previous)
+        next Expr::Variable.new(previous)
       end
 
       if match?(Token::LEFT_PAREN)
         expr = expression
         consume(Token::RIGHT_PAREN, "Expect ')' after expression.")
-        return Expr::Grouping.new(expr)
+        next Expr::Grouping.new(expr)
       end
 
       raise error(peek, "Expect expression")
     end
 
-    def unary
+    rule :unary do |next_rule|
       if match?(Token::BANG, Token::MINUS)
         operator = previous
-        right = unary
-        return Expr::Unary.new(operator, right)
+        right = next_rule.call
+        next Expr::Unary.new(operator, right)
       end
 
       primary
     end
 
-    def self.binary(name, next_item, types)
+    def self.binary(name, types)
       class_eval <<-CODE
-        def #{name}
-          expr = #{next_item}
+        rule :#{name} do |next_rule|
+          expr = next_rule.call
 
           while match?(#{types.map { |t| "Token::#{t}" }.join(", ")})
             operator = previous
-            right = #{next_item}
+            right = next_rule.call
             expr = Expr::Binary.new(expr, operator, right)
           end
 
@@ -140,14 +150,14 @@ module Lox
       CODE
     end
 
-    binary :factor, :unary, %i[SLASH STAR]
-    binary :term, :factor, %i[MINUS PLUS]
-    binary :comparison, :term, %i[GREATER GREATER_EQUAL LESS LESS_EQUAL]
-    binary :equality, :comparison, %i[BANG_EQUAL EQUAL_EQUAL]
+    binary :factor, %i[SLASH STAR]
+    binary :term, %i[MINUS PLUS]
+    binary :comparison, %i[GREATER GREATER_EQUAL LESS LESS_EQUAL]
+    binary :equality, %i[BANG_EQUAL EQUAL_EQUAL]
 
-    def assignment
+    rule :assignment do |next_rule|
       # Get any expression.
-      expr = equality
+      expr = next_rule.call
 
       # If the next token is '=', turn this into an assignment.
       if match?(Token::EQUAL)
@@ -157,7 +167,7 @@ module Lox
         if expr.is_a?(Expr::Variable)
           # This will get more complex.
           name = expr.name
-          return Expr::Assign.new(name, value)
+          next Expr::Assign.new(name, value)
         end
 
         # Report error but do not throw
@@ -181,7 +191,7 @@ module Lox
       statements = []
 
       while !current?(Token::RIGHT_BRACE) && !eof?
-        statements << declaration
+        statements << first_rule
       end
 
       consume(Token::RIGHT_BRACE, "Expect '}' after block.")
@@ -214,5 +224,7 @@ module Lox
     rescue Error
       synchronize
     end
+
+    alias first_rule declaration
   end
 end
