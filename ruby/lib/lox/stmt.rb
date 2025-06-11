@@ -18,9 +18,9 @@ module Lox
       CODE
     end
 
-    type :Block, %i[statements]
-    type :Expression, %i[expression]
-    type :Print, %i[expression]
-    type :Var, %i[name initializer]
+    Lox.defs("stmt").each do |type, args|
+      # Discard the type.
+      self.type type, args.map { |_type, name| name }
+    end
   end
 end

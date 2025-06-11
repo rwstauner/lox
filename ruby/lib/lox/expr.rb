@@ -18,11 +18,9 @@ module Lox
       CODE
     end
 
-    type :Assign, %i[name value]
-    type :Binary, %i[left operator right]
-    type :Grouping, %i[expression]
-    type :Literal, %i[value]
-    type :Unary, %i[operator right]
-    type :Variable, %i[name]
+    Lox.defs("expr").each do |type, args|
+      # Discard the type.
+      self.type type, args.map { |_type, name| name }
+    end
   end
 end
