@@ -19,6 +19,8 @@ module Lox
     File.read(File.join(Lox::DEF_DIR, "#{name}.def")).lines.map do |line|
       next if line.match?(/^\s*(#.*)?$/)
 
+      next line.strip if line.match?(/^\w+$/)
+
       type, args = line.split(":", 2).map(&:strip)
       args = args.split(",").map(&:strip).map { |x| x.split(" ", 2) }
       [type, args]
