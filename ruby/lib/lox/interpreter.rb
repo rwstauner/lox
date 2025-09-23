@@ -127,7 +127,7 @@ module Lox
       val
     end
 
-    def vals_equal(l, r)
+    def vals_equal?(l, r)
       l == r
     end
 
