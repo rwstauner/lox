@@ -18,7 +18,7 @@ module Lox
         return
       end
 
-      return @enclosing.assign(token) if enclosed?
+      return @enclosing.assign(token, value) if enclosed?
 
       undefined!(key)
     end
