@@ -37,7 +37,7 @@ module Lox
     end
 
     def undefined!(name)
-      raise Lox::RuntimeError, "Undefined variable '#{name}'."
+      raise Lox::Error, "Undefined variable '#{name}'."
     end
   end
 end
