@@ -75,9 +75,9 @@ module Lox
         return if previous.type == Token::SEMICOLON
 
         return if STATEMENT_STARTERS.include?(peek.type)
-      end
 
-      advance
+        advance
+      end
     end
 
     def parse
