@@ -22,7 +22,11 @@ module Lox
       next line.strip if line.match?(/^\w+$/)
 
       type, args = line.split(":", 2).map(&:strip)
-      args = args.split(",").map(&:strip).map { |x| x.split(" ", 2) }
+      args = args.split(",").map(&:strip).map do |x|
+        typ, nam = x.split(" ", 2)
+        # Convert "thenBranch" to "then_branch".
+        [typ, nam.gsub(/([a-z])([A-Z])/) { "#{$1}_#{$2.downcase}" }]
+      end
       [type, args]
     end.compact
   end
