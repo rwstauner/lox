@@ -188,6 +188,7 @@ module Lox
     alias expression assignment
 
     def statement
+      return for_statement if match?(Token::FOR)
       return if_statement if match?(Token::IF)
       return print_statement if match?(Token::PRINT)
       return while_statement if match?(Token::WHILE)
@@ -228,6 +229,34 @@ module Lox
       consume(Token::RIGHT_PAREN, "Expect ')' after 'while' condition.");
       body = statement
       Stmt::While.new(condition, body)
+    end
+
+    def for_statement
+      consume(Token::LEFT_PAREN, "Expect '(' after 'for'.");
+
+      initializer = if match?(Token::SEMICOLON)
+        nil
+      elsif match?(Token::VAR)
+        var_declaration
+      else
+        expression_statement
+      end
+
+      condition = expression if !current?(Token::SEMICOLON)
+      consume(Token::SEMICOLON, "Expect ';' after loop condition.");
+
+      increment = expression if !current?(Token::SEMICOLON)
+      consume(Token::RIGHT_PAREN, "Expect ')' after for clauses.");
+
+      body = statement
+
+      # Desugar to "initializer; while (condition) { body; increment; }";
+      body = Stmt::Block.new([body, Stmt::Expression.new(increment)]) if increment
+      condition = Expr::Literal.new(true) if !condition
+      body = Stmt::While.new(condition, body)
+      body = Stmt::Block.new([initializer, body]) if initializer
+
+      body
     end
 
     def expression_statement
