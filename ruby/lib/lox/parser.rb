@@ -134,7 +134,7 @@ module Lox
       primary
     end
 
-    def self.binary(name, types)
+    def self.binary(name, types, expr_class = "Binary")
       class_eval <<-CODE
         rule :#{name} do |next_rule|
           expr = next_rule.call
@@ -142,7 +142,7 @@ module Lox
           while match?(#{types.map { |t| "Token::#{t}" }.join(", ")})
             operator = previous
             right = next_rule.call
-            expr = Expr::Binary.new(expr, operator, right)
+            expr = Expr::#{expr_class}.new(expr, operator, right)
           end
 
           expr
@@ -150,10 +150,17 @@ module Lox
       CODE
     end
 
+    def self.logical(name, types)
+      binary(name, types, "Logical")
+    end
+
     binary :factor, %i[SLASH STAR]
     binary :term, %i[MINUS PLUS]
     binary :comparison, %i[GREATER GREATER_EQUAL LESS LESS_EQUAL]
     binary :equality, %i[BANG_EQUAL EQUAL_EQUAL]
+
+    logical :and, %i[AND]
+    logical :or, %i[OR]
 
     rule :assignment do |next_rule|
       # Get any expression.

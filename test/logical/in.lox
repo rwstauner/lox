@@ -1,0 +1,7 @@
+print "hi" or 2; // "hi".
+print nil or "yes"; // "yes".
+
+print "x" and "y"; // "y".
+print nil and "z"; // blank line
+
+print "done";

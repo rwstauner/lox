@@ -94,6 +94,23 @@ module Lox
       end
     end
 
+    def visit_logical(expr)
+      left = evaluate(expr.left)
+
+      case expr.operator.type
+      when Token::OR
+        # Short circuit true for OR.
+        return left if bool(left)
+      when Token::AND
+        # Short circuit false for AND.
+        return left if !bool(left)
+      else
+        raise ArgumentError, "Unknown Logical type: #{expr.type}"
+      end
+
+      evaluate(expr.right)
+    end
+
     def visit_block_stmt(stmt)
       execute_block(stmt.statements, Environment.new(@environment))
     end
