@@ -123,11 +123,12 @@ module Lox
       arguments = expr.arguments.map(&method(:evaluate))
 
       if !callee.respond_to?(:call)
-        Lox.error(expr.paren, "Can only call functions and classes.")
+        Lox.error("Can only call functions and classes.", token: expr.paren)
       end
 
       if arguments.size != callee.arity
-        Lox.error(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
+        p callee
+        Lox.error("Expected #{callee.arity} arguments but got #{arguments.size}.", token: expr.paren)
       end
 
       callee.call(self, arguments)
