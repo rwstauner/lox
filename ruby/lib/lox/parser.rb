@@ -221,6 +221,7 @@ module Lox
       return for_statement if match?(Token::FOR)
       return if_statement if match?(Token::IF)
       return print_statement if match?(Token::PRINT)
+      return return_statement if match?(Token::RETURN)
       return while_statement if match?(Token::WHILE)
       return block_statement if match?(Token::LEFT_BRACE)
 
@@ -251,6 +252,13 @@ module Lox
       value = expression
       consume(Token::SEMICOLON, "Expect ';' after value.")
       Stmt::Print.new(value)
+    end
+
+    def return_statement
+      keyword = previous
+      value = expression if !current?(Token::SEMICOLON)
+      consume(Token::SEMICOLON, "Expect ';' after return.")
+      return Stmt::Return.new(keyword, value)
     end
 
     def while_statement

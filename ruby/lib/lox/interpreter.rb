@@ -166,6 +166,11 @@ module Lox
       puts stringify(value)
     end
 
+    def visit_return_stmt(stmt)
+      value = evaluate(stmt.value) if stmt.value
+      throw(:return, value)
+    end
+
     def visit_var_stmt(stmt)
       value = evaluate(stmt.initializer) if !stmt.initializer.nil?
       @environment.define(stmt.name.lexeme, value)

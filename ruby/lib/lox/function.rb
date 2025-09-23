@@ -19,8 +19,10 @@ module Lox
         environment.define(param.lexeme, arg)
       end
 
-      interpreter.execute_block(declaration.body.statements, environment)
-      nil
+      catch(:return) do
+        interpreter.execute_block(declaration.body.statements, environment)
+        nil
+      end
     end
 
     def to_s
