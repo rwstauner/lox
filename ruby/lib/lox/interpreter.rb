@@ -12,13 +12,13 @@ module Lox
 
     attr_reader :environment
 
-    def initialize
-      @environment = Environment.new
+    GLOBALS = Environment.new.tap do |env|
+      env.define_fun(Lox::Function::Native.new("clock") { |_i| Process.clock_gettime(Process::CLOCK_MONOTONIC) })
+      env.define_fun(Lox::Function::Native.new("sleep") { |_i, s| sleep(s) })
     end
 
-    def globals
-      @globals ||= Environment.new.tap do |env|
-      end
+    def initialize
+      @environment = Environment.new(GLOBALS)
     end
 
     def interpret(statements)

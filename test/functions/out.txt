@@ -20,3 +20,5 @@ Hi, Dear Reader!
 1597
 2584
 4181
+true
+<native clock>

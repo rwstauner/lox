@@ -28,5 +28,29 @@ module Lox
     def to_s
       "<fn #{declaration.name.lexeme}>"
     end
+    alias inspect to_s
+
+    class Native
+      attr_reader :callable, :name
+
+      def initialize(name, &callable)
+        @name = name
+        @callable = callable
+      end
+
+      def arity
+        # Interpreter is first arg.
+        callable.arity - 1
+      end
+
+      def call(interpreter, arguments)
+        callable.call(interpreter, *arguments)
+      end
+
+      def to_s
+        "<native #{name}>"
+      end
+      alias inspect to_s
+    end
   end
 end

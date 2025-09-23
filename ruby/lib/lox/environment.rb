@@ -11,6 +11,10 @@ module Lox
       @values[name] = value
     end
 
+    def define_fun(fun)
+      define(fun.name, fun)
+    end
+
     def assign(token, value)
       key = token.lexeme
       if @values.key?(key)
