@@ -102,6 +102,14 @@ module Lox
       evaluate(stmt.expression)
     end
 
+    def visit_if_stmt(stmt)
+      if bool(evaluate(stmt.condition))
+        execute(stmt.then_branch)
+      elsif stmt.else_branch
+        execute(stmt.else_branch)
+      end
+    end
+
     def visit_print_stmt(stmt)
       value = evaluate(stmt.expression)
       puts stringify(value)

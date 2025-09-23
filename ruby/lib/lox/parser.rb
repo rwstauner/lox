@@ -181,6 +181,7 @@ module Lox
     alias expression assignment
 
     def statement
+      return if_statement if match?(Token::IF)
       return print_statement if match?(Token::PRINT)
       return block_statement if match?(Token::LEFT_BRACE)
 
@@ -196,6 +197,15 @@ module Lox
 
       consume(Token::RIGHT_BRACE, "Expect '}' after block.")
       Stmt::Block.new(statements)
+    end
+
+    def if_statement
+      consume(Token::LEFT_PAREN, "Expect '(' after 'if'.");
+      condition = expression
+      consume(Token::RIGHT_PAREN, "Expect ')' after 'if' condition.");
+      then_branch = statement
+      else_branch = statement if match?(Token::ELSE)
+      Stmt::If.new(condition, then_branch, else_branch)
     end
 
     def print_statement
