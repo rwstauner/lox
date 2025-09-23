@@ -127,6 +127,12 @@ module Lox
       end
     end
 
+    def visit_while_stmt(stmt)
+      while bool(evaluate(stmt.condition))
+        execute(stmt.body)
+      end
+    end
+
     def visit_print_stmt(stmt)
       value = evaluate(stmt.expression)
       puts stringify(value)

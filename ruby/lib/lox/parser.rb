@@ -190,6 +190,7 @@ module Lox
     def statement
       return if_statement if match?(Token::IF)
       return print_statement if match?(Token::PRINT)
+      return while_statement if match?(Token::WHILE)
       return block_statement if match?(Token::LEFT_BRACE)
 
       expression_statement
@@ -219,6 +220,14 @@ module Lox
       value = expression
       consume(Token::SEMICOLON, "Expect ';' after value.")
       Stmt::Print.new(value)
+    end
+
+    def while_statement
+      consume(Token::LEFT_PAREN, "Expect '(' after 'while'.");
+      condition = expression
+      consume(Token::RIGHT_PAREN, "Expect ')' after 'while' condition.");
+      body = statement
+      Stmt::While.new(condition, body)
     end
 
     def expression_statement
