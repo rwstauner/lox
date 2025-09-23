@@ -10,8 +10,15 @@ module Lox
       end
     end
 
+    attr_reader :environment
+
     def initialize
       @environment = Environment.new
+    end
+
+    def globals
+      @globals ||= Environment.new.tap do |env|
+      end
     end
 
     def interpret(statements)
@@ -111,12 +118,33 @@ module Lox
       evaluate(expr.right)
     end
 
+    def visit_call(expr)
+      callee = evaluate(expr.callee)
+      arguments = expr.arguments.map(&method(:evaluate))
+
+      if !callee.respond_to?(:call)
+        Lox.error(expr.paren, "Can only call functions and classes.")
+      end
+
+      if arguments.size != callee.arity
+        Lox.error(expr.paren, "Expected #{callee.arity} arguments but got #{arguments.size}.")
+      end
+
+      callee.call(self, arguments)
+    end
+
     def visit_block_stmt(stmt)
       execute_block(stmt.statements, Environment.new(@environment))
     end
 
     def visit_expression_stmt(stmt)
       evaluate(stmt.expression)
+    end
+
+    def visit_function_stmt(stmt)
+      fn = Lox::Function.new(stmt)
+      environment.define(stmt.name.lexeme, fn)
+      nil
     end
 
     def visit_if_stmt(stmt)

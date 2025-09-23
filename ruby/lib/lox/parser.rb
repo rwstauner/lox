@@ -124,6 +124,36 @@ module Lox
       raise error(peek, "Expect expression")
     end
 
+    rule :call do |next_rule|
+      expr = next_rule.call # primary
+
+      loop do
+        if match?(Token::LEFT_PAREN)
+          expr = finish_call(expr)
+        else
+          break
+        end
+      end
+
+      expr
+    end
+
+    MAX_ARGUMENTS = 255
+    def finish_call(callee)
+      arguments = []
+      if !current?(Token::RIGHT_PAREN)
+        begin
+          if arguments.size > MAX_ARGUMENTS
+            error(peek, "Can't have more than #{MAX_ARGUMENTS}")
+          end
+          arguments << expression
+        end while match?(Token::COMMA)
+      end
+
+      paren = consume(Token::RIGHT_PAREN, "Expect ')' after arguments.");
+      Expr::Call.new(callee, paren, arguments)
+    end
+
     rule :unary do |next_rule|
       if match?(Token::BANG, Token::MINUS)
         operator = previous
@@ -272,7 +302,32 @@ module Lox
       Stmt::Var.new(name, initializer)
     end
 
+    def function(kind)
+      name = consume(Token::IDENTIFIER, "Expect #{kind} name.")
+      consume(Token::LEFT_PAREN, "Expect '(' after #{kind} name.");
+
+      parameters = []
+      if !current?(Token::RIGHT_PAREN)
+        begin
+          if parameters.size >= MAX_ARGUMENTS
+            error(peek, "Can't have more than #{MAX_ARGUMENTS} parameters.")
+
+          end
+
+          parameters << consume(Token::IDENTIFIER, "Expect parameter name.")
+        end while match?(Token::COMMA)
+      end
+
+      consume(Token::RIGHT_PAREN, "Expect ')' after parameters.")
+
+      consume(Token::LEFT_BRACE, "Expect '{' before #{kind} body.")
+      body = block_statement
+      Stmt::Function.new(name, parameters, body)
+    end
+
     def declaration
+      # Function, function, what's your conjunction?
+      return function("function") if match?(Token::FUN)
       return var_declaration if match?(Token::VAR)
 
       statement

@@ -7,6 +7,7 @@ module Lox
   autoload :CLI,         "lox/cli"
   autoload :Environment, "lox/environment"
   autoload :Expr,        "lox/expr"
+  autoload :Function,    "lox/function"
   autoload :Interpreter, "lox/interpreter"
   autoload :Parser,      "lox/parser"
   autoload :Scanner,     "lox/scanner"

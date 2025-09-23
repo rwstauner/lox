@@ -1,0 +1,2 @@
+Hi, Dear Reader!
+<fn sayHi>
