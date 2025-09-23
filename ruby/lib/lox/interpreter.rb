@@ -143,7 +143,7 @@ module Lox
     end
 
     def visit_function_stmt(stmt)
-      fn = Lox::Function.new(stmt)
+      fn = Lox::Function.new(stmt, environment)
       environment.define(stmt.name.lexeme, fn)
       nil
     end

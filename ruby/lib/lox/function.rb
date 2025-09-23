@@ -4,8 +4,9 @@ module Lox
   class Function
     attr_reader :declaration
 
-    def initialize(declaration)
+    def initialize(declaration, closure)
       @declaration = declaration
+      @closure = closure
     end
 
     def arity
@@ -13,7 +14,7 @@ module Lox
     end
 
     def call(interpreter, arguments)
-      environment = Environment.new(interpreter.environment)
+      environment = Environment.new(@closure)
 
       declaration.params.zip(arguments).each do |param, arg|
         environment.define(param.lexeme, arg)
