@@ -13,7 +13,7 @@ module Lox
     end
 
     def call(interpreter, arguments)
-      environment = Environment.new(interpreter.globals)
+      environment = Environment.new(interpreter.environment)
 
       declaration.params.zip(arguments).each do |param, arg|
         environment.define(param.lexeme, arg)
