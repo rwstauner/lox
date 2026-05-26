@@ -97,6 +97,7 @@ module Lox
         orig = block
         rule = @last_rule
         block = ->() { instance_exec(->() { send(rule) }, &orig) }
+        # TODO: recurse?
       end
       define_method(name, &block)
       @last_rule = name
@@ -157,11 +158,11 @@ module Lox
     rule :unary do |next_rule|
       if match?(Token::BANG, Token::MINUS)
         operator = previous
-        right = next_rule.call
+        right = next_rule.call # TODO: this_rule?
         next Expr::Unary.new(operator, right)
       end
 
-      primary
+      next_rule.call # call
     end
 
     def self.binary(name, types, expr_class = "Binary")
