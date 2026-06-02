@@ -12,6 +12,9 @@ void chunk_init(chunk_t *chunk) {
   chunk->locations.lines = NULL;
   chunk->locations.line_counts = NULL;
 
+  ARRAY_INIT(&chunk->locations.column_meta);
+  chunk->locations.columns = NULL;
+
   value_array_init(&chunk->constants);
 }
 
@@ -19,18 +22,26 @@ void chunk_free(chunk_t *chunk) {
   ARRAY_FREE(&chunk->array_meta, chunk->code);
   ARRAY_FREE(&chunk->locations.line_meta, chunk->locations.lines);
   ARRAY_FREE(&chunk->locations.line_meta, chunk->locations.line_counts);
+  ARRAY_FREE(&chunk->locations.column_meta, chunk->locations.columns);
   value_array_free(&chunk->constants);
   chunk_init(chunk);
 }
 
-void chunk_write(chunk_t *chunk, byte_t byte, int line) {
+void chunk_write_data(chunk_t *chunk, byte_t byte) {
   array_meta_t *am = &chunk->array_meta;
   if (am->capacity < am->count + 1) {
     int old_capacity = ARRAY_GROW_CAPACITY(am);
     ARRAY_GROW(am, chunk->code, old_capacity);
   }
 
-  if (line > 0) {
+  chunk->code[am->count] = byte;
+  am->count++;
+}
+
+void chunk_write_instruction(chunk_t *chunk, byte_t byte, int line, int column) {
+  chunk_write_data(chunk, byte);
+
+  {
     array_meta_t *lm = &chunk->locations.line_meta;
     if (lm->count == 0 ||
         chunk->locations.lines[lm->count - 1] != line) {
@@ -43,13 +54,22 @@ void chunk_write(chunk_t *chunk, byte_t byte, int line) {
       chunk->locations.lines[lm->count] = line;
       chunk->locations.line_counts[lm->count] = 1;
       lm->count++;
-    } else {
+    }
+    else {
       chunk->locations.line_counts[lm->count - 1]++;
     }
   }
 
-  chunk->code[am->count] = byte;
-  am->count++;
+  {
+    array_meta_t *cm = &chunk->locations.column_meta;
+    if (cm->capacity < cm->count + 1) {
+      int old_capacity = ARRAY_GROW_CAPACITY(cm);
+      ARRAY_GROW(cm, chunk->locations.columns, old_capacity);
+    }
+
+    chunk->locations.columns[cm->count] = column;
+    cm->count++;
+  }
 }
 
 // Add value to chunk constants and return the index where it was added.
@@ -70,7 +90,7 @@ int chunk_instruction_length(byte_t instruction) {
   }
 }
 
-int chunk_instruction_count(chunk_t* chunk, int offset) {
+int chunk_instruction_count(const chunk_t* chunk, int offset) {
   int insn_count = 0;
   for (int i = 0; i <= offset;) {
     byte_t instruction = chunk->code[i];
@@ -80,7 +100,7 @@ int chunk_instruction_count(chunk_t* chunk, int offset) {
   return insn_count;
 }
 
-int chunk_get_line(chunk_t* chunk, int offset) {
+source_location_t *chunk_get_location(const chunk_t* chunk, int offset, source_location_t *out_location) {
   // NOTE: For the disassemble case we could track insn_count and pass it in instead of calculating it again.
   int insn_count = chunk_instruction_count(chunk, offset);
 
@@ -89,10 +109,15 @@ int chunk_get_line(chunk_t* chunk, int offset) {
   for (; line_index < chunk->locations.line_meta.count; line_index++) {
     if (line_counts + chunk->locations.line_counts[line_index] < insn_count){
       line_counts += chunk->locations.line_counts[line_index];
-    } else {
+    }
+    else {
       break;
     }
   }
 
-  return chunk->locations.lines[line_index];
+  out_location->line = chunk->locations.lines[line_index];
+  // insn:col is 1:1
+  out_location->column = chunk->locations.columns[insn_count - 1];
+
+  return out_location;
 }

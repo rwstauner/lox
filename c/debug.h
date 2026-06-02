@@ -3,8 +3,9 @@
 
 #include "chunk.h"
 
-#define OFFSET_DIGITS 4
-#define LINE_NUMBER_DIGITS 4
+static const int OFFSET_DIGITS = 4;
+static const int COLUMN_DIGITS = 3;
+static const int LINE_NUMBER_DIGITS = 4;
 
 void disassemble_chunk(chunk_t *chunk, const char *name);
 int disassemble_instruction(chunk_t *chunk, int offset);

@@ -25,12 +25,20 @@ static void constant_instruction(const char *name, chunk_t* chunk, int offset) {
 int disassemble_instruction(chunk_t *chunk, int offset) {
   printf("%0*d ", OFFSET_DIGITS, offset);
 
-  int line = chunk_get_line(chunk, offset);
-  if (offset > 0 && line == chunk_get_line(chunk, offset - 1)) {
-    printf("%*s ", LINE_NUMBER_DIGITS, "|");
+  source_location_t location = *chunk_get_location(chunk, offset, &location);
+  source_location_t previous;
+
+  if (offset > 0 && location.line == chunk_get_location(chunk, offset - 1, &previous)->line) {
+    printf("%*s", LINE_NUMBER_DIGITS, "|");
   }
   else {
-    printf("%*d ", LINE_NUMBER_DIGITS, line);
+    printf("%*d", LINE_NUMBER_DIGITS, location.line);
+  }
+  if (location.column > 0) {
+    printf(":%0*d ", COLUMN_DIGITS, location.column);
+  }
+  else {
+    printf(" %*s ", COLUMN_DIGITS, " ");
   }
 
   byte_t instruction = chunk->code[offset];
