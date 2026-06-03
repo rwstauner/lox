@@ -3,7 +3,7 @@
 
 #include "common.h"
 
-typedef struct {
+typedef struct array_meta_t {
   int count;
   int capacity;
 } array_meta_t;
