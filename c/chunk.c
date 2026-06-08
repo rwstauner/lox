@@ -92,23 +92,9 @@ int chunk_instruction_length(byte_t instruction) {
   }
 }
 
-int chunk_instruction_count(const chunk_t* chunk, int offset) {
-  int insn_count = 0;
-  for (int i = 0; i <= offset;) {
-    byte_t instruction = chunk->code[i];
-    i += chunk_instruction_length(instruction);
-    insn_count += 1;
-  }
-  return insn_count;
-}
-
-source_location_t *chunk_get_location(const chunk_t* chunk, int offset, source_location_t *out_location) {
-  // NOTE: For the disassemble case we could track insn_count and pass it in instead of calculating it again.
-  int insn_count = chunk_instruction_count(chunk, offset);
-
-  int line_counts = 0;
+source_location_t *chunk_get_location(const chunk_t* chunk, int insn_count, source_location_t *out_location) {
   int line_index = 0;
-  for (; line_index < chunk->locations.line_meta.count; line_index++) {
+  for (int line_counts = 0; line_index < chunk->locations.line_meta.count; line_index++) {
     if (line_counts + chunk->locations.line_counts[line_index] < insn_count){
       line_counts += chunk->locations.line_counts[line_index];
     }

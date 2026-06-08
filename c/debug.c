@@ -3,11 +3,13 @@
 #include "debug.h"
 #include "value.h"
 
-void disassemble_chunk(chunk_t *chunk, const char *name) {
+void disassemble_chunk(const chunk_t *chunk, const char *name) {
   printf("== %s ==\n", name);
 
+  int insn_count = 0;
   for (int offset = 0; offset < chunk->array_meta.count;) {
-    offset = disassemble_instruction(chunk, offset);
+    insn_count++;
+    offset = disassemble_instruction(chunk, insn_count, offset);
   }
 }
 
@@ -22,13 +24,13 @@ static void constant_instruction(const char *name, chunk_t* chunk, int offset) {
   printf("'\n");
 }
 
-int disassemble_instruction(chunk_t *chunk, int offset) {
+int disassemble_instruction(const chunk_t *chunk, int insn_count, int offset) {
   printf("%0*d ", OFFSET_DIGITS, offset);
 
-  source_location_t location = *chunk_get_location(chunk, offset, &location);
+  source_location_t location = *chunk_get_location(chunk, insn_count, &location);
   source_location_t previous;
 
-  if (offset > 0 && location.line == chunk_get_location(chunk, offset - 1, &previous)->line) {
+  if (insn_count > 1 && location.line == chunk_get_location(chunk, insn_count - 1, &previous)->line) {
     printf("%*s", LINE_NUMBER_DIGITS, "|");
   }
   else {
