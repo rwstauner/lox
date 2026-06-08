@@ -36,8 +36,8 @@ typedef struct chunk_t {
 
 void chunk_init(chunk_t *chunk);
 void chunk_free(chunk_t *chunk);
+void chunk_write_data(chunk_t *chunk, int count, byte_t bytes[]);
 void chunk_write_instruction(chunk_t *chunk, byte_t byte, int line, int column);
-void chunk_write_data(chunk_t *chunk, byte_t byte);
 
 int chunk_add_constant(chunk_t* chunk, value_t value);
 source_location_t *chunk_get_location(const chunk_t* chunk, int offset, source_location_t *out_location);

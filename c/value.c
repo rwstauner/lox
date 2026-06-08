@@ -16,7 +16,7 @@ void value_array_free(value_array_t *array) {
 void value_array_write(value_array_t *array, value_t value) {
   array_meta_t *am = &array->meta;
   if (am->capacity < am->count + 1) {
-    int old_capacity = ARRAY_GROW_CAPACITY(am);
+    int old_capacity = ARRAY_GROW_CAPACITY(am, 1);
     ARRAY_GROW(am, array->values, old_capacity);
   }
 

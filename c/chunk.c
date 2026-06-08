@@ -27,26 +27,28 @@ void chunk_free(chunk_t *chunk) {
   chunk_init(chunk);
 }
 
-void chunk_write_data(chunk_t *chunk, byte_t byte) {
+void chunk_write_data(chunk_t *chunk, int count, byte_t bytes[]) {
   array_meta_t *am = &chunk->array_meta;
-  if (am->capacity < am->count + 1) {
-    int old_capacity = ARRAY_GROW_CAPACITY(am);
+  if (am->capacity < am->count + count) {
+    int old_capacity = ARRAY_GROW_CAPACITY(am, count);
     ARRAY_GROW(am, chunk->code, old_capacity);
   }
 
-  chunk->code[am->count] = byte;
-  am->count++;
+  for ( int i = 0; i < count; i++ ){
+    chunk->code[am->count] = bytes[i];
+    am->count++;
+  }
 }
 
 void chunk_write_instruction(chunk_t *chunk, byte_t byte, int line, int column) {
-  chunk_write_data(chunk, byte);
+  chunk_write_data(chunk, 1, &byte);
 
   {
     array_meta_t *lm = &chunk->locations.line_meta;
     if (lm->count == 0 ||
         chunk->locations.lines[lm->count - 1] != line) {
       if (lm->capacity < lm->count + 1) {
-        int old_capacity = ARRAY_GROW_CAPACITY(lm);
+        int old_capacity = ARRAY_GROW_CAPACITY(lm, 1);
         ARRAY_GROW(lm, chunk->locations.lines, old_capacity);
         ARRAY_GROW(lm, chunk->locations.line_counts, old_capacity);
       }
@@ -63,7 +65,7 @@ void chunk_write_instruction(chunk_t *chunk, byte_t byte, int line, int column) 
   {
     array_meta_t *cm = &chunk->locations.column_meta;
     if (cm->capacity < cm->count + 1) {
-      int old_capacity = ARRAY_GROW_CAPACITY(cm);
+      int old_capacity = ARRAY_GROW_CAPACITY(cm, 1);
       ARRAY_GROW(cm, chunk->locations.columns, old_capacity);
     }
 
