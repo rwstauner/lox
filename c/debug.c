@@ -26,6 +26,16 @@ static int constant_instruction(const char *name, const chunk_t* chunk, int offs
   return offset + 2;
 }
 
+static int constant_instruction_long(const char *name, const chunk_t* chunk, int offset) {
+  int constant, size;
+  value_t value = chunk_read_constant_long(chunk, offset, &constant, &size);
+
+  printf("%-16s %*d '", name, OFFSET_DIGITS, constant);
+  value_print(value);
+  printf("'\n");
+  return offset + size;
+}
+
 int disassemble_instruction(const chunk_t *chunk, int insn_count, int offset) {
   printf("%0*d ", OFFSET_DIGITS, offset);
 
@@ -47,6 +57,8 @@ int disassemble_instruction(const chunk_t *chunk, int insn_count, int offset) {
 
   byte_t instruction = chunk->code[offset];
   switch (instruction) {
+    case OP_CONSTANT_LONG:
+      return constant_instruction_long("OP_CONSTANT_LONG", chunk, offset);
     case OP_CONSTANT:
       return constant_instruction("OP_CONSTANT", chunk, offset);
     case OP_RETURN:

@@ -75,9 +75,59 @@ void chunk_write_instruction(chunk_t *chunk, byte_t byte, int line, int column) 
 }
 
 // Add value to chunk constants and return the index where it was added.
-int chunk_add_constant(chunk_t* chunk, value_t value) {
+static int chunk_add_constant(chunk_t* chunk, value_t value) {
   value_array_write(&chunk->constants, value);
   return chunk->constants.meta.count - 1;
+}
+
+value_t chunk_read_constant_long(const chunk_t *chunk, int offset, int *out_constant, int *out_size) {
+  int constant = 0;
+  byte_t bits = 0;
+  int index = offset + 1;
+  do {
+    bits = chunk->code[index];
+    constant = (constant << 7) + (bits & 127);
+    index++;
+  } while (bits & (1 << 7));
+
+  // OP_CONSTANT_LONG starts after 255.
+  constant += 255;
+
+  *out_constant = constant;
+  *out_size = index - offset;
+
+  return chunk->constants.values[constant];
+}
+
+#define CONSTANT_BYTE_MAX 8
+
+void chunk_write_constant(chunk_t *chunk, value_t value, int line, int column) {
+  int index = chunk_add_constant(chunk, value);
+  int op = OP_CONSTANT;
+  int byte_count = 0;
+  byte_t bytes[CONSTANT_BYTE_MAX];
+
+  if (index < 256) {
+    byte_count = 1;
+    bytes[CONSTANT_BYTE_MAX - 1] = index;
+  }
+  else {
+    // Constants are all stored in the same array.
+    // OP_CONSTANT uses one byte for the value.
+    // OP_CONSTANT_LONG can use up to 7 bytes to indicate how far the index is past 255.
+    op = OP_CONSTANT_LONG;
+    index -= 255;
+    int mask = 0; // Lowest 7bits will have no top marker.
+    do {
+      byte_count++;
+      // Move lowest 7 bits into slots from right to left.
+      bytes[CONSTANT_BYTE_MAX - byte_count] = index & 127 | mask;
+      index >>= 7;
+      mask = (1 << 7); // Remaining bits will get the continuation bit set.
+    } while(index > 0);
+  }
+  chunk_write_instruction(chunk, op, line, column);
+  chunk_write_data(chunk, byte_count, (bytes + (CONSTANT_BYTE_MAX - byte_count)));
 }
 
 source_location_t *chunk_get_location(const chunk_t* chunk, int insn_count, source_location_t *out_location) {
