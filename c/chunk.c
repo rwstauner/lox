@@ -80,18 +80,6 @@ int chunk_add_constant(chunk_t* chunk, value_t value) {
   return chunk->constants.meta.count - 1;
 }
 
-int chunk_instruction_length(byte_t instruction) {
-  switch (instruction) {
-    case OP_CONSTANT:
-      return 2;
-    case OP_RETURN:
-      return 1;
-    default:
-      fprintf(stderr, "Unknown opcode %d\n", instruction);
-      return 1;
-  }
-}
-
 source_location_t *chunk_get_location(const chunk_t* chunk, int insn_count, source_location_t *out_location) {
   int line_index = 0;
   for (int line_counts = 0; line_index < chunk->locations.line_meta.count; line_index++) {

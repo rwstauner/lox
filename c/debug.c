@@ -13,15 +13,17 @@ void disassemble_chunk(const chunk_t *chunk, const char *name) {
   }
 }
 
-static void simple_instruction(const char *name, int offset) {
+static int simple_instruction(const char *name, int offset) {
   printf("%s\n", name);
+  return offset + 1;
 }
 
-static void constant_instruction(const char *name, chunk_t* chunk, int offset) {
+static int constant_instruction(const char *name, const chunk_t* chunk, int offset) {
   byte_t constant = chunk->code[offset + 1];
   printf("%-16s %*d '", name, OFFSET_DIGITS, constant);
   value_print(chunk->constants.values[constant]);
   printf("'\n");
+  return offset + 2;
 }
 
 int disassemble_instruction(const chunk_t *chunk, int insn_count, int offset) {
@@ -46,15 +48,11 @@ int disassemble_instruction(const chunk_t *chunk, int insn_count, int offset) {
   byte_t instruction = chunk->code[offset];
   switch (instruction) {
     case OP_CONSTANT:
-      constant_instruction("OP_CONSTANT", chunk, offset);
-      break;
+      return constant_instruction("OP_CONSTANT", chunk, offset);
     case OP_RETURN:
-      simple_instruction("OP_RETURN", offset);
-      break;
+      return simple_instruction("OP_RETURN", offset);
     default:
       printf("Unknown opcode %d\n", instruction);
-      break;
+      return offset + 1;
   }
-
-  return offset + chunk_instruction_length(instruction);
 }
