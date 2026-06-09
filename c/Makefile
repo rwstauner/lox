@@ -12,9 +12,9 @@ all: $(BUILD_DIR)/$(NAME)
 
 # Link interpreter
 $(BUILD_DIR)/$(NAME): $(OBJECTS)
-	$(CC) $(CFLAGS) $^ -o $@
+	$(CC) -fsanitize=address,undefined $(CFLAGS) $^ -o $@
 
 # Compile object files
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) -c $(C_LANG) $(CFLAGS) -o $@ $<
+	$(CC) -g -c $(C_LANG) $(CFLAGS) -o $@ $<
