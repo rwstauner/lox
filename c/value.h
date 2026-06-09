@@ -8,7 +8,7 @@ typedef double value_t;
 
 typedef struct value_array_t {
   array_meta_t meta;
-  value_t* values;
+  value_t *values;
 } value_array_t;
 
 void value_array_init(value_array_t* array);
