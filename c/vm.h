@@ -5,16 +5,16 @@
 #include "memory.h"
 #include "value.h"
 
-typedef struct stack_t {
+typedef struct vm_stack_t {
   array_meta_t meta;
   value_t *values;
   value_t *top;
-} stack_t;
+} vm_stack_t;
 
 typedef struct vm_t {
   const chunk_t *chunk;
   byte_t *ip; // instruction pointer
-  stack_t stack;
+  vm_stack_t stack;
 } vm_t;
 
 typedef enum {
@@ -25,6 +25,6 @@ typedef enum {
 
 void vm_init(vm_t *vm);
 void vm_free(vm_t *vm);
-interpret_result_t vm_interpret(vm_t *vm, const chunk_t *chunk);
+interpret_result_t vm_interpret(vm_t *vm, const char *source);
 
 #endif

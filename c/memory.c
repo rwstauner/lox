@@ -8,6 +8,7 @@ void *reallocate(void *pointer, size_t old_size, size_t new_size) {
     free(pointer);
     return NULL;
   }
+  (void)old_size; // FIXME
 
   void *result = realloc(pointer, new_size);
   if (result == NULL){

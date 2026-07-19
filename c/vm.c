@@ -37,6 +37,7 @@ void vm_init(vm_t *vm) {
 }
 
 void vm_free(vm_t *vm) {
+  (void)vm; // FIXME
 }
 
 static interpret_result_t run(vm_t *vm) {
