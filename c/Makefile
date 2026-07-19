@@ -1,6 +1,9 @@
 NAME = clox
-SOURCE_DIR = $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
-BUILD_DIR = $(SOURCE_DIR)/build
+SOURCE_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
+BUILD_DIR := $(SOURCE_DIR)/build
+GEN_DIR := $(SOURCE_DIR)/gen
+DEFS_DIR := $(dir $(realpath $(dir $SOURCE_DIR)))/defs
+TOOLS_DIR := $(realpath $(dir $SOURCE_DIR))/tools
 
 # Files.
 HEADERS := $(wildcard $(SOURCE_DIR)/*.h)
@@ -28,11 +31,18 @@ endif
 .PHONY: all
 all: $(BUILD_DIR)/$(NAME)
 
+clean:
+	rm -rf $(BUILD_DIR) $(GEN_DIR)
+
 # Link interpreter
 $(BUILD_DIR)/$(NAME): $(OBJECTS)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # Compile object files
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS) $(SOURCE_DIR)/Makefile $(GEN_DIR)/tokens.h
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(GEN_DIR)/tokens.h: $(DEFS_DIR)/tokens.def Makefile
+	@mkdir -p $(dir $@)
+	perl -lne 'BEGIN { print "// generated from Makefile.\n#ifndef CLOX_GEN_TOKENS_H\n#define CLOX_GEN_TOKENS_H\n\ntypedef enum {"; } if (/^\s*(#.*)?\z/){ s{\s*#}{  \/\/} if /\S/; print; } else { print "  TOKEN_$$_,"; } END { print "\n  TOKEN_ERROR\n} token_type_t;\n\n#endif" }' $< > $@
