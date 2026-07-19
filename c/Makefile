@@ -7,14 +7,17 @@ HEADERS := $(wildcard $(SOURCE_DIR)/*.h)
 SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
 OBJECTS := $(addprefix $(BUILD_DIR)/, $(notdir $(SOURCES:.c=.o)))
 
+CFLAGS += -fsanitize=address,undefined -g -Wall -Wextra -Wpedantic -Werror
+LDFLAGS += -fsanitize=address,undefined #-Wl,--as-needed
+
 .PHONY: all
 all: $(BUILD_DIR)/$(NAME)
 
 # Link interpreter
 $(BUILD_DIR)/$(NAME): $(OBJECTS)
-	$(CC) -fsanitize=address,undefined $(CFLAGS) $^ -o $@
+	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # Compile object files
 $(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS)
 	@mkdir -p $(BUILD_DIR)
-	$(CC) -g -c $(C_LANG) $(CFLAGS) -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
