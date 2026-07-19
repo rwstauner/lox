@@ -39,9 +39,13 @@ $(BUILD_DIR)/$(NAME): $(OBJECTS)
 	$(CC) $(LDFLAGS) $^ $(LDLIBS) -o $@
 
 # Compile object files
-$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS) $(SOURCE_DIR)/Makefile $(GEN_DIR)/tokens.h
+$(BUILD_DIR)/%.o: $(SOURCE_DIR)/%.c $(HEADERS) $(SOURCE_DIR)/Makefile $(GEN_DIR)/tokens.h $(GEN_DIR)/ident.h
 	@mkdir -p $(BUILD_DIR)
 	$(CC) $(CPPFLAGS) $(CFLAGS) -c $< -o $@
+
+$(GEN_DIR)/ident.h: $(DEFS_DIR)/tokens.def $(TOOLS_DIR)/ident.pl
+	@mkdir -p $(dir $@)
+	$(TOOLS_DIR)/ident.pl $< > $@
 
 $(GEN_DIR)/tokens.h: $(DEFS_DIR)/tokens.def Makefile
 	@mkdir -p $(dir $@)
