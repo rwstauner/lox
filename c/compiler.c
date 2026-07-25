@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "chunk.h"
 #include "common.h"
@@ -90,11 +91,45 @@ parse_rule_t rules[] = {
   [TOKEN_EOF]           = {NULL, NULL, PREC_NONE},
 };
 
+static char * repeat(char c, int n) {
+  char *buffer = (char *)malloc((n + 1) * sizeof(c));
+  memset(buffer, c, n);
+  buffer[n] = '\0';
+  return buffer;
+}
+
 static void error_at(parser_t *parser, token_t *token, const char *message) {
   if (parser->panic_mode) return;
   parser->panic_mode = true;
 
-  fprintf(stderr, "[line %d] Error", token->line);
+  const char *line_start = parser->scanner->line_start;
+  int line_length;
+  {
+    char *line_end = strchr(line_start, '\n');
+    if (line_end == NULL) {
+      // If no newline found use end of string.
+      line_length = (int)strlen(line_start);
+    }
+    else {
+      line_length = (int)(line_end - line_start);
+    }
+    // TODO: If line gets very long print an excerpt from the middle.
+  }
+
+  char *marker = repeat('^', token->length);
+
+  fprintf(stderr, " %.*s\n<%*s%-*s>\n",
+    line_length,
+    line_start,
+    token->column - 1,
+    "",
+    line_length - token->column + 1,
+    marker
+  );
+
+  free(marker);
+
+  fprintf(stderr, "[at %d:%d] Error", token->line, token->column);
 
   if (token->type == TOKEN_EOF) {
     fprintf(stderr, " at end");

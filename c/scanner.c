@@ -28,12 +28,9 @@ static bool is_at_end(scanner_t *scanner) {
 }
 
 static token_t error_token(scanner_t *scanner, const char *message) {
-  token_t token;
-  token.type = TOKEN_ERROR;
+  token_t token = make_token(scanner, TOKEN_ERROR);
   token.start = message;
   token.length = (int)strlen(message);
-  token.line = scanner->line;
-  token.column = 0;
   return token;
 }
 
