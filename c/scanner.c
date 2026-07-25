@@ -9,6 +9,7 @@
 void scanner_init(scanner_t *scanner, const char *source) {
   scanner->start = source;
   scanner->current = source;
+  scanner->line_start = source;
   scanner->line = 1;
 }
 
@@ -18,6 +19,7 @@ static token_t make_token(scanner_t *scanner, token_type_t type) {
   token.start = scanner->start;
   token.length = (int)(scanner->current - scanner->start);
   token.line = scanner->line;
+  token.column = (int)(scanner->start - scanner->line_start) + 1;
   return token;
 }
 
@@ -31,12 +33,18 @@ static token_t error_token(scanner_t *scanner, const char *message) {
   token.start = message;
   token.length = (int)strlen(message);
   token.line = scanner->line;
+  token.column = 0;
   return token;
 }
 
 static char advance(scanner_t *scanner) {
   scanner->current++;
   return scanner->current[-1];
+}
+
+static void advance_line(scanner_t *scanner) {
+  scanner->line++;
+  scanner->line_start = scanner->current;
 }
 
 static bool match(scanner_t *scanner, char expected) {
@@ -58,7 +66,7 @@ static char peek_next(scanner_t *scanner) {
 
 static token_t string(scanner_t *scanner) {
   while (peek(scanner) != '"' && !is_at_end(scanner)) {
-    if (peek(scanner) == '\n') scanner->line++;
+    if (peek(scanner) == '\n') advance_line(scanner);
     advance(scanner);
   }
 
@@ -110,7 +118,7 @@ static void skip_whitespace(scanner_t *scanner) {
         advance(scanner);
         break;
       case '\n':
-        scanner->line++;
+        advance_line(scanner);
         advance(scanner);
         break;
       case '/':
