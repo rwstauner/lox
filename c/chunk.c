@@ -119,7 +119,7 @@ void chunk_write_constant(chunk_t *chunk, value_t value, int line, int column) {
     do {
       byte_count++;
       // Move lowest 7 bits into slots from right to left.
-      bytes[CONSTANT_BYTE_MAX - byte_count] = index & 127 | mask;
+      bytes[CONSTANT_BYTE_MAX - byte_count] = (index & 127) | mask;
       index >>= 7;
       mask = (1 << 7); // Remaining bits will get the continuation bit set.
     } while(index > 0);
