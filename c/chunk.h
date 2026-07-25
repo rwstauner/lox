@@ -18,6 +18,8 @@ typedef enum {
 
 typedef uint8_t byte_t;
 
+#define CONSTANT_BYTE_MAX 8
+
 // Useful for APIs but not stored this way.
 typedef struct source_location_t {
   // const char *file;

@@ -1,6 +1,7 @@
 #include <stdio.h>
 
 #include "common.h"
+#include "compiler.h"
 #include "debug.h"
 #include "vm.h"
 
@@ -109,8 +110,19 @@ static interpret_result_t run(vm_t *vm) {
 #undef READ_BYTE
 }
 
-interpret_result_t vm_interpret(vm_t *vm, const chunk_t *chunk) {
-  vm->chunk = chunk;
-  vm->ip = chunk->code;
-  return run(vm);
+interpret_result_t vm_interpret(vm_t *vm, const char *source) {
+  chunk_t chunk;
+  chunk_init(&chunk);
+
+  if (!compile(source, &chunk)) {
+    chunk_free(&chunk);
+    return INTERPRET_COMPILE_ERROR;
+  }
+
+  vm->chunk = &chunk;
+  vm->ip = chunk.code;
+  interpret_result_t result = run(vm);
+
+  chunk_free(&chunk);
+  return result;
 }

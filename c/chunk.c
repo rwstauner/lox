@@ -99,8 +99,6 @@ value_t chunk_read_constant_long(const chunk_t *chunk, int offset, int *out_cons
   return chunk->constants.values[constant];
 }
 
-#define CONSTANT_BYTE_MAX 8
-
 void chunk_write_constant(chunk_t *chunk, value_t value, int line, int column) {
   int index = chunk_add_constant(chunk, value);
   int op = OP_CONSTANT;
