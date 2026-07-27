@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 #include "common.h"
 #include "compiler.h"
@@ -38,7 +39,7 @@ void vm_init(vm_t *vm) {
 }
 
 void vm_free(vm_t *vm) {
-  (void)vm; // FIXME
+  free(vm->stack.values);
 }
 
 static interpret_result_t run(vm_t *vm) {
