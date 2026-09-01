@@ -42,6 +42,18 @@ endif
 .PHONY: all
 all: $(BUILD_DIR)/$(NAME)
 
+# Try to find RUN_FILE based on parent dir.
+ifneq ($(RUN_FILE),)
+  ifeq ($(realpath $(RUN_FILE)),)
+    RUN_FILE := $(dir $(SOURCE_DIR))$(RUN_FILE)
+  endif
+  export RUN_FILE
+endif
+
+run: all
+	# Set RUN_FILE to a lox file, else repl.
+	$(BUILD_DIR)/$(NAME) $(RUN_FILE)
+
 clean:
 	rm -rf $(BUILD_DIR) $(GEN_DIR)
 

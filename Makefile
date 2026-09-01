@@ -1,6 +1,6 @@
 .PHONY: c docker-image
 c:
-	make -C c clean all
+	make -C c clean run
 clean:
 	make -C c clean
 	@# don't need to clean $(DOCKER_IMAGE_TOUCH) here
@@ -14,4 +14,4 @@ $(DOCKER_IMAGE_TOUCH): Dockerfile
 	mkdir -p $$(dirname $(DOCKER_IMAGE_TOUCH)) && touch $(DOCKER_IMAGE_TOUCH)
 
 docker: docker-image
-	docker run --rm -it -v $(PWD):/src -w /src $(DOCKER_TAG) make c
+	docker run --rm -it -v $(PWD):/src -w /src -e RUN_FILE $(DOCKER_TAG) make c
