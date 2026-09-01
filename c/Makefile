@@ -1,3 +1,5 @@
+UNAME := $(shell uname -s | tr A-Z a-z)
+
 NAME = clox
 SOURCE_DIR := $(realpath $(dir $(lastword $(MAKEFILE_LIST))))
 BUILD_DIR := $(SOURCE_DIR)/build
@@ -16,10 +18,12 @@ LDFLAGS += -fsanitize=address,undefined #-Wl,--as-needed
 HAVE_READLINE := $(shell printf '\#include <readline/readline.h>\nint main(){readline("");return 0;}\n' | $(CC) -xc - -lreadline -o /dev/null 2>/dev/null && echo yes)
 
 ifneq ($(HAVE_READLINE),yes)
-  READLINE := $(shell brew --prefix readline)
-  ifneq ($(READLINE),)
-    CPPFLAGS += -I$(READLINE)/include
-    LDFLAGS += -L$(READLINE)/lib
+  ifeq ($(UNAME),darwin)
+    READLINE := $(shell brew --prefix readline)
+    ifneq ($(READLINE),)
+      CPPFLAGS += -I$(READLINE)/include
+      LDFLAGS += -L$(READLINE)/lib
+    endif
   endif
 endif
 
