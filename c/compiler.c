@@ -105,7 +105,7 @@ static void error_at(parser_t *parser, token_t *token, const char *message) {
   const char *line_start = parser->scanner->line_start;
   int line_length;
   {
-    char *line_end = strchr(line_start, '\n');
+    const char *line_end = strchr(line_start, '\n');
     if (line_end == NULL) {
       // If no newline found use end of string.
       line_length = (int)strlen(line_start);
