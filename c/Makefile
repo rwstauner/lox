@@ -12,6 +12,13 @@ HEADERS := $(wildcard $(SOURCE_DIR)/*.h)
 SOURCES := $(wildcard $(SOURCE_DIR)/*.c)
 OBJECTS := $(addprefix $(BUILD_DIR)/, $(notdir $(SOURCES:.c=.o)))
 
+ifeq ($(UNAME),darwin)
+  ASAN_OPTIONS ?= detect_leaks=0
+else
+  ASAN_OPTIONS ?= detect_leaks=1
+endif
+export ASAN_OPTIONS
+
 CFLAGS += -fsanitize=address,undefined -g -Wall -Wextra -Wpedantic -Werror
 LDFLAGS += -fsanitize=address,undefined #-Wl,--as-needed
 
