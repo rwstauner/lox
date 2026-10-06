@@ -24,6 +24,29 @@ void value_array_write(value_array_t *array, value_t value) {
   am->count++;
 }
 
+bool values_equal(value_t a, value_t b) {
+  if (a.type != b.type) return false;
+  switch(a.type) {
+    case VAL_BOOL: return AS_BOOL(a) == AS_BOOL(b);
+    case VAL_NIL:  return true;
+    case VAL_NUMBER: return AS_NUMBER(a) == AS_NUMBER(b);
+    default: return false; // Unreachable.
+  }
+}
+
 void value_print(value_t value) {
-  printf("%g", value);
+  switch(value.type) {
+    case VAL_BOOL:
+      printf("%s", AS_BOOL(value) ? "true" : "false");
+      break;
+    case VAL_NIL:
+      printf("%s", "nil");
+      break;
+    case VAL_NUMBER:
+      printf("%g", AS_NUMBER(value));
+      break;
+    default:
+      printf("%s", "value_print what?");
+      break;
+  }
 }
