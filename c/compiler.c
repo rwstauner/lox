@@ -173,7 +173,7 @@ static void consume(parser_t *parser, token_type_t type, const char *message) {
   error_at_current(parser, message);
 }
 
-static void emit_byte(parser_t *parser, byte_t byte, token_t previous) {
+static void emit_byte(parser_t *parser, token_t previous, byte_t byte) {
   chunk_write_instruction(parser->chunk, byte, previous.line, previous.column);
 }
 
@@ -188,7 +188,7 @@ static void emit_constant(parser_t *parser, value_t value) {
 }
 
 static void emit_return(parser_t *parser) {
-  emit_byte(parser, OP_RETURN, parser->previous);
+  emit_byte(parser, parser->previous, OP_RETURN);
 }
 
 static void end_compiler(parser_t *parser) {
@@ -219,7 +219,7 @@ static void parse_unary(parser_t *parser) {
 
   // Emit operator instruction.
   switch(operator_type) {
-    case TOKEN_MINUS: emit_byte(parser, OP_NEGATE, previous); break;
+    case TOKEN_MINUS: emit_byte(parser, previous, OP_NEGATE); break;
     default: return; // Unreachable.
   }
 }
@@ -235,10 +235,10 @@ static void parse_binary(parser_t *parser) {
   parse_precedence(parser, (precedence_t)(rule->precedence + 1));
 
   switch(operator_type) {
-    case TOKEN_PLUS:  emit_byte(parser, OP_ADD, previous); break;
-    case TOKEN_MINUS: emit_byte(parser, OP_SUBTRACT, previous); break;
-    case TOKEN_STAR:  emit_byte(parser, OP_MULTIPLY, previous); break;
-    case TOKEN_SLASH: emit_byte(parser, OP_DIVIDE, previous); break;
+    case TOKEN_PLUS:  emit_byte(parser, previous, OP_ADD); break;
+    case TOKEN_MINUS: emit_byte(parser, previous, OP_SUBTRACT); break;
+    case TOKEN_STAR:  emit_byte(parser, previous, OP_MULTIPLY); break;
+    case TOKEN_SLASH: emit_byte(parser, previous, OP_DIVIDE); break;
     default: return; // Unreachable.
   }
 }
