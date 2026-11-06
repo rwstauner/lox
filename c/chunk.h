@@ -46,6 +46,7 @@ typedef struct chunk_t {
     int *columns;
   } locations;
   value_array_t constants;
+  heap_t *heap;
 } chunk_t;
 
 

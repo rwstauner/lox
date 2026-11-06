@@ -15,6 +15,7 @@ typedef struct vm_t {
   const chunk_t *chunk;
   byte_t *ip; // instruction pointer
   vm_stack_t stack;
+  heap_t *heap;
 } vm_t;
 
 typedef enum {

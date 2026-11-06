@@ -3,6 +3,8 @@
 
 #include "chunk.h"
 
+#define DEBUG_PRINT(...) printf(__VA_ARGS__)
+
 static const int OFFSET_DIGITS = 4;
 static const int COLUMN_DIGITS = 3;
 static const int LINE_NUMBER_DIGITS = 4;

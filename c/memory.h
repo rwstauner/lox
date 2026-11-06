@@ -2,11 +2,15 @@
 #define CLOX_MEMORY_H
 
 #include "common.h"
+#include "array_meta.h"
+#include "object.h"
 
-typedef struct array_meta_t {
-  int count;
-  int capacity;
-} array_meta_t;
+typedef struct heap_t {
+  void *objects;
+} heap_t;
+
+#define ALLOCATE(type, count) \
+  (type *)reallocate(NULL, 0, sizeof(type) * (count))
 
 #define ARRAY_INIT(meta) \
   ((meta)->capacity = 0, (meta)->count = 0)
@@ -34,5 +38,12 @@ void *reallocate(void *pointer, size_t old_size, size_t new_size);
 
 #define ARRAY_FREE(meta, ptr) \
     reallocate((ptr), sizeof(*(ptr)) * (meta)->capacity, 0)
+
+#define FREE(type, ptr) \
+  reallocate(ptr, sizeof(type), 0)
+#define FREE_ARRAY(type, ptr, old_count) \
+  reallocate(ptr, sizeof(type) * old_count, 0)
+
+void free_objects(object_t *objects);
 
 #endif

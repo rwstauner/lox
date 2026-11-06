@@ -1,10 +1,12 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+#include "debug.h"
 #include "memory.h"
 
 void *reallocate(void *pointer, size_t old_size, size_t new_size) {
   if (new_size == 0) {
+    DEBUG_PRINT("FREE(%p) ", pointer);
     free(pointer);
     return NULL;
   }
@@ -16,4 +18,28 @@ void *reallocate(void *pointer, size_t old_size, size_t new_size) {
     exit(1);
   }
   return result;
+}
+
+static void free_object(object_t *object) {
+  switch (object->type) {
+    case OBJ_STRING: {
+      DEBUG_PRINT("Freeing string { ");
+      print_object(OBJECT_VALUE(object));
+      DEBUG_PRINT(" ");
+      object_string_t *string = (object_string_t *)object;
+      FREE_ARRAY(char, string->chars, string->length + 1);
+      FREE(object_string_t, object);
+      DEBUG_PRINT(" }\n");
+      break;
+    }
+  }
+}
+
+void free_objects(object_t *objects) {
+  object_t *object = objects;
+  while (object != NULL) {
+    object_t *next = object->next;
+    free_object(object);
+    object = next;
+  }
 }

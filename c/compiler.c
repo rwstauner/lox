@@ -5,6 +5,7 @@
 #include "chunk.h"
 #include "common.h"
 #include "compiler.h"
+#include "object_ops.h"
 #include "scanner.h"
 
 #ifdef DEBUG_PRINT_CODE
@@ -47,6 +48,7 @@ static void parse_unary(parser_t *);
 static void parse_binary(parser_t *);
 static void parse_literal(parser_t *);
 static void parse_number(parser_t *);
+static void parse_string(parser_t *);
 static void parse_precedence(parser_t *, precedence_t);
 
 parse_rule_t rules[] = {
@@ -70,7 +72,7 @@ parse_rule_t rules[] = {
   [TOKEN_LESS]          = {NULL, parse_binary, PREC_COMPARISON},
   [TOKEN_LESS_EQUAL]    = {NULL, parse_binary, PREC_COMPARISON},
   [TOKEN_IDENTIFIER]    = {NULL, NULL, PREC_NONE},
-  [TOKEN_STRING]        = {NULL, NULL, PREC_NONE},
+  [TOKEN_STRING]        = {parse_string, NULL, PREC_NONE},
   [TOKEN_NUMBER]        = {parse_number, NULL, PREC_NONE},
   [TOKEN_AND]           = {NULL, NULL, PREC_NONE},
   [TOKEN_CLASS]         = {NULL, NULL, PREC_NONE},
@@ -283,6 +285,14 @@ static void parse_precedence(parser_t *parser, precedence_t precedence) {
 static void parse_number(parser_t *parser) {
   double value = strtod(parser->previous.start, NULL);
   emit_constant(parser, NUMBER_VALUE(value));
+}
+
+static void parse_string(parser_t *parser) {
+  emit_constant(parser, OBJECT_VALUE(obj_copy_string(
+    parser->chunk->heap,
+    parser->previous.start  + 1, // trim leading quote
+    parser->previous.length - 2  // trim trailing quote
+  )));
 }
 
 static void parser_init(parser_t *parser, const char *source, chunk_t *chunk) {

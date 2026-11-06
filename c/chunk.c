@@ -1,6 +1,7 @@
 #include <stdlib.h>
 #include <stdio.h>
 
+#include "debug.h"
 #include "chunk.h"
 #include "memory.h"
 
@@ -19,11 +20,16 @@ void chunk_init(chunk_t *chunk) {
 }
 
 void chunk_free(chunk_t *chunk) {
+  DEBUG_PRINT("Freeing chunk.\n");
+
   ARRAY_FREE(&chunk->array_meta, chunk->code);
   ARRAY_FREE(&chunk->locations.line_meta, chunk->locations.lines);
   ARRAY_FREE(&chunk->locations.line_meta, chunk->locations.line_counts);
   ARRAY_FREE(&chunk->locations.column_meta, chunk->locations.columns);
   value_array_free(&chunk->constants);
+
+  DEBUG_PRINT("\nchunk freed.\n");
+
   chunk_init(chunk);
 }
 

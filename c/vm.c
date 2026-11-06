@@ -1,10 +1,14 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
 #include "common.h"
 #include "compiler.h"
 #include "debug.h"
+#include "object.h"
+#include "object_ops.h"
+#include "memory.h"
 #include "vm.h"
 
 static void ensure_stack_capacity(vm_t *vm, int count) {
@@ -49,14 +53,32 @@ static value_t pop(vm_t *vm) {
 
 void vm_init(vm_t *vm) {
   reset_stack(vm);
+  vm->heap = ALLOCATE(heap_t, 1);
+  vm->heap->objects = NULL;
 }
 
 void vm_free(vm_t *vm) {
   free(vm->stack.values);
+  free_objects(vm->heap->objects);
+  free(vm->heap);
 }
 
 static bool is_falsey(value_t value) {
   return IS_NIL(value) || (IS_BOOL(value) && !AS_BOOL(value));
+}
+
+static void concatenate(vm_t *vm) {
+  object_string_t *b = AS_STRING(pop(vm));
+  object_string_t *a = AS_STRING(pop(vm));
+
+  int length = a->length + b->length;
+  char *chars = ALLOCATE(char, length + 1);
+  memcpy(chars, a->chars, a->length);
+  memcpy(chars + a->length, b->chars, b->length);
+  chars[length] = '\0';
+
+  object_string_t *result = obj_take_string(vm->heap, chars, length);
+  push(vm, OBJECT_VALUE(result));
 }
 
 static interpret_result_t run(vm_t *vm) {
@@ -123,7 +145,21 @@ static interpret_result_t run(vm_t *vm) {
       case OP_GREATER:  BINARY_OP(BOOL_VALUE, >); break;
       case OP_LESS:     BINARY_OP(BOOL_VALUE, <); break;
 
-      case OP_ADD:      BINARY_OP(NUMBER_VALUE, +); break;
+      case OP_ADD: {
+        if (IS_NUMBER(PEEK(0)) && IS_NUMBER(PEEK(1))){
+          double b = AS_NUMBER(pop(vm));
+          double a = AS_NUMBER(pop(vm));
+          push(vm, NUMBER_VALUE(a + b));
+        }
+        else if (IS_STRING(PEEK(0)) && IS_STRING(PEEK(1))) {
+          concatenate(vm);
+        }
+        else {
+          runtime_error(vm, insn_count, "Operands must be two numbers or two strings.");
+          return INTERPRET_RUNTIME_ERROR;
+        }
+        break;
+      }
       case OP_SUBTRACT: BINARY_OP(NUMBER_VALUE, -); break;
       case OP_MULTIPLY: BINARY_OP(NUMBER_VALUE, *); break;
       case OP_DIVIDE:   BINARY_OP(NUMBER_VALUE, /); break;
@@ -158,6 +194,7 @@ static interpret_result_t run(vm_t *vm) {
 interpret_result_t vm_interpret(vm_t *vm, const char *source) {
   chunk_t chunk;
   chunk_init(&chunk);
+  chunk.heap = vm->heap;
 
   if (!compile(source, &chunk)) {
     chunk_free(&chunk);
