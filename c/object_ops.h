@@ -3,7 +3,7 @@
 
 #include "object.h"
 
+object_string_t *allocate_string(heap_t *heap, int length);
 object_string_t *obj_copy_string(heap_t *heap, const char *chars, int length);
-object_string_t *obj_take_string(heap_t *heap, char *chars, int length);
 
 #endif

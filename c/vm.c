@@ -72,12 +72,10 @@ static void concatenate(vm_t *vm) {
   object_string_t *a = AS_STRING(pop(vm));
 
   int length = a->length + b->length;
-  char *chars = ALLOCATE(char, length + 1);
-  memcpy(chars, a->chars, a->length);
-  memcpy(chars + a->length, b->chars, b->length);
-  chars[length] = '\0';
+  object_string_t *result = allocate_string(vm->heap, length);
+  memcpy(result->chars, a->chars, a->length);
+  memcpy(result->chars + a->length, b->chars, b->length);
 
-  object_string_t *result = obj_take_string(vm->heap, chars, length);
   push(vm, OBJECT_VALUE(result));
 }
 

@@ -26,8 +26,6 @@ static void free_object(object_t *object) {
       DEBUG_PRINT("Freeing string { ");
       print_object(OBJECT_VALUE(object));
       DEBUG_PRINT(" ");
-      object_string_t *string = (object_string_t *)object;
-      FREE_ARRAY(char, string->chars, string->length + 1);
       FREE(object_string_t, object);
       DEBUG_PRINT(" }\n");
       break;
