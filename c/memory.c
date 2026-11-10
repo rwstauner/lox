@@ -26,7 +26,7 @@ static void free_object(object_t *object) {
       DEBUG_PRINT("Freeing string { ");
       print_object(OBJECT_VALUE(object));
       DEBUG_PRINT(" ");
-      FREE(object_string_t, object);
+      FREE_EXTRA(object_string_t, object, ((object_string_t*)object)->length + 1);
       DEBUG_PRINT(" }\n");
       break;
     }

@@ -45,6 +45,8 @@ void *reallocate(void *pointer, size_t old_size, size_t new_size);
   reallocate(ptr, sizeof(type), 0)
 #define FREE_ARRAY(type, ptr, old_count) \
   reallocate(ptr, sizeof(type) * old_count, 0)
+#define FREE_EXTRA(type, ptr, extra) \
+  reallocate(ptr, sizeof(type) + extra, 0)
 
 void free_objects(object_t *objects);
 
