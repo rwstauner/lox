@@ -4,9 +4,11 @@
 #include "common.h"
 #include "array_meta.h"
 #include "object.h"
+#include "table.h"
 
 typedef struct heap_t {
-  void *objects;
+  object_t *objects;
+  table_t strings;
 } heap_t;
 
 #define ALLOCATE(type, count) \

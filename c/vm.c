@@ -55,10 +55,12 @@ void vm_init(vm_t *vm) {
   reset_stack(vm);
   vm->heap = ALLOCATE(heap_t, 1);
   vm->heap->objects = NULL;
+  table_init(&vm->heap->strings);
 }
 
 void vm_free(vm_t *vm) {
   free(vm->stack.values);
+  table_free(&vm->heap->strings);
   free_objects(vm->heap->objects);
   free(vm->heap);
 }
@@ -75,6 +77,8 @@ static void concatenate(vm_t *vm) {
   object_string_t *result = allocate_string(vm->heap, length);
   memcpy(result->chars, a->chars, a->length);
   memcpy(result->chars + a->length, b->chars, b->length);
+  result->hash = hash_string(result->chars, length);
+  result = string_intern(vm->heap, result);
 
   push(vm, OBJECT_VALUE(result));
 }

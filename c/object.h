@@ -16,6 +16,7 @@ struct object_t {
 struct object_string_t {
   object_t obj;
   int length;
+  uint32_t hash;
   char chars[];
 };
 

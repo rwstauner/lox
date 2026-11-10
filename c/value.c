@@ -32,14 +32,7 @@ bool values_equal(value_t a, value_t b) {
     case VAL_BOOL: return AS_BOOL(a) == AS_BOOL(b);
     case VAL_NIL:  return true;
     case VAL_NUMBER: return AS_NUMBER(a) == AS_NUMBER(b);
-    case VAL_OBJECT: {
-      object_string_t *a_str = AS_STRING(a);
-      object_string_t *b_str = AS_STRING(b);
-      return (a_str->length == b_str->length &&
-          0 == memcmp(a_str->chars,
-                      b_str->chars,
-                      a_str->length));
-    }
+    case VAL_OBJECT: return AS_OBJECT(a) == AS_OBJECT(b); // interned
     default: return false; // Unreachable.
   }
 }

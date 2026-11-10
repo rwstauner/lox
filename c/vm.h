@@ -3,6 +3,7 @@
 
 #include "chunk.h"
 #include "memory.h"
+#include "table.h"
 #include "value.h"
 
 typedef struct vm_stack_t {
