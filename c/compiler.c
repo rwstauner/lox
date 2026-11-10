@@ -108,6 +108,10 @@ static void error_at(parser_t *parser, token_t *token, const char *message) {
   const char *line_start = parser->scanner->line_start;
   int line_length;
   {
+    // If the current token is a newlne, start search after that.
+    // FIXME: Could we advance line_start when it's on a newline?
+    if (*line_start == '\n') line_start++;
+
     const char *line_end = strchr(line_start, '\n');
     if (line_end == NULL) {
       // If no newline found use end of string.
